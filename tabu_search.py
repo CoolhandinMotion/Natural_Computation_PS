@@ -18,7 +18,8 @@ def distance(point1:tuple[int,int,int], point2:tuple[int,int,int])->float:
     # each point is (index,x,y)
     return math.sqrt((point1[1] - point2[1])**2 + (point1[2] - point2[2])**2)
 
-
+# TODO: this could way be imporved by a dict that takes (city1,city2) and maps to distance
+"you dont calculate each distance twice!!!"
 def generate_neighbours(points:list[tuple[int,int,int]])->dict[int,dict[int,float]]:
     """This function geenrates a 2D distance matrix between all points
     Parameters

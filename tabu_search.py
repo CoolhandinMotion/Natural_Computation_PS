@@ -14,11 +14,13 @@ import copy
 import math
 
 
-def distance(point1, point2):
-    return math.sqrt((point1.x - point2.x)**2 + (point1.y - point2.y)**2)
+def distance(point1:tuple[int,int,int], point2:tuple[int,int,int])->float:
+    # each point is (index,x,y)
+    return math.sqrt((point1[1] - point2[1])**2 + (point1[2] - point2[2])**2)
 
-
-def generate_neighbours(points)->dict[int,dict[int,float]]:
+# TODO: this could way be imporved by a dict that takes (city1,city2) and maps to distance
+"you dont calculate each distance twice!!!"
+def generate_neighbours(points:list[tuple[int,int,int]])->dict[int,dict[int,float]]:
     """This function geenrates a 2D distance matrix between all points
     Parameters
     ----------
@@ -50,26 +52,27 @@ def generate_neighbours(points)->dict[int,dict[int,float]]:
     return dict_of_neighbours
 
 
-def generate_first_solution(nodes, dict_of_neighbours):
-    start_node = nodes[0]
-    end_node = start_node
-
-    first_solution = []
-    distance = 0
-    visiting = start_node
-    pre_node = None
-    while visiting not in first_solution:
-        _tmp = copy.deepcopy(dict_of_neighbours[visiting])
-        _tmp.pop(pre_node, None)
-        next_node = min(_tmp.items(), key=lambda x: x[1])[0]
-        distance += dict_of_neighbours[visiting][next_node]
-        first_solution.append(visiting)
-        pre_node = visiting
-        visiting = next_node
-
-    first_solution.append(nodes[0])
-    distance += dict_of_neighbours[pre_node][end_node]
-    return first_solution, distance
+# def generate_first_solution(nodes, dict_of_neighbours):
+#     "not used in project"
+#     start_node = nodes[0]
+#     end_node = start_node
+#
+#     first_solution = []
+#     distance = 0
+#     visiting = start_node
+#     pre_node = None
+#     while visiting not in first_solution:
+#         _tmp = copy.deepcopy(dict_of_neighbours[visiting])
+#         _tmp.pop(pre_node, None)
+#         next_node = min(_tmp.items(), key=lambda x: x[1])[0]
+#         distance += dict_of_neighbours[visiting][next_node]
+#         first_solution.append(visiting)
+#         pre_node = visiting
+#         visiting = next_node
+#
+#     first_solution.append(nodes[0])
+#     distance += dict_of_neighbours[pre_node][end_node]
+#     return first_solution, distance
 
 def find_neighborhood(solution, dict_of_neighbours, n_opt=1):
     neighborhood_of_solution = []
@@ -111,7 +114,11 @@ def find_neighborhood(solution, dict_of_neighbours, n_opt=1):
     return neighborhood_of_solution
 
 
-def tabu_search(first_solution, distance_of_first_solution, dict_of_neighbours, iters, size, n_opt=1):
+def tabu_search(first_solution,
+                distance_of_first_solution,
+                dict_of_neighbours:dict[int,dict[int,float]],
+                iters:int, size:int, n_opt=1):
+
     count = 1
     solution = first_solution
     tabu_list = list()

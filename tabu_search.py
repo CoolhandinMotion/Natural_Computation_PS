@@ -20,6 +20,7 @@ def distance(point1:tuple[int,int,int], point2:tuple[int,int,int])->float:
 
 # TODO: this could way be imporved by a dict that takes (city1,city2) and maps to distance
 "you dont calculate each distance twice!!!"
+"This is only used once in the code."
 def generate_neighbours(points:list[tuple[int,int,int]])->dict[int,dict[int,float]]:
     """This function geenrates a 2D distance matrix between all points
     Parameters
@@ -52,66 +53,44 @@ def generate_neighbours(points:list[tuple[int,int,int]])->dict[int,dict[int,floa
     return dict_of_neighbours
 
 
-# def generate_first_solution(nodes, dict_of_neighbours):
-#     "not used in project"
-#     start_node = nodes[0]
-#     end_node = start_node
-#
-#     first_solution = []
-#     distance = 0
-#     visiting = start_node
-#     pre_node = None
-#     while visiting not in first_solution:
-#         _tmp = copy.deepcopy(dict_of_neighbours[visiting])
-#         _tmp.pop(pre_node, None)
-#         next_node = min(_tmp.items(), key=lambda x: x[1])[0]
-#         distance += dict_of_neighbours[visiting][next_node]
-#         first_solution.append(visiting)
-#         pre_node = visiting
-#         visiting = next_node
-#
-#     first_solution.append(nodes[0])
-#     distance += dict_of_neighbours[pre_node][end_node]
-#     return first_solution, distance
-
-def find_neighborhood(solution, dict_of_neighbours, n_opt=1):
+def _find_neighborhood(solution, dict_of_neighbours, n_opt=1):
     neighborhood_of_solution = []
-    for n in solution[1:-n_opt]:
-        idx1 = []
-        n_index = solution.index(n)
-        for i in range(n_opt):
-            idx1.append(n_index+i)
 
-        for kn in solution[1:-n_opt]:
-            idx2 = []
-            kn_index = solution.index(kn)
-            for i in range(n_opt):
-                idx2.append(kn_index+i)
-            if bool(
-                    set(solution[idx1[0]:(idx1[-1]+1)]) &
-                    set(solution[idx2[0]:(idx2[-1]+1)])):
+    # Work with indices directly instead of values to avoid issues with duplicates
+    for i in range(1, len(solution) - n_opt):
+        idx1 = list(range(i, i + n_opt))
 
+        for j in range(1, len(solution) - n_opt):
+            idx2 = list(range(j, j + n_opt))
+
+            # Skip if ranges overlap
+            if set(idx1) & set(idx2):
                 continue
 
+            # Swap segments to generate a new neighbor
+            new_solution = copy.deepcopy(solution)
+            for k in range(n_opt):
+                new_solution[idx1[k]], new_solution[idx2[k]] = (
+                    solution[idx2[k]],
+                    solution[idx1[k]],
+                )
 
-            _tmp = copy.deepcopy(solution)
-            for i in range(n_opt):
-                _tmp[idx1[i]] = solution[idx2[i]]
-                _tmp[idx2[i]] = solution[idx1[i]]
+            # Calculate total distance
+            total_distance = 0
+            for k in range(len(new_solution) - 1):
+                current_node = new_solution[k]
+                next_node = new_solution[k + 1]
+                total_distance += dict_of_neighbours[current_node][next_node]
 
-            distance = 0
-            for k in _tmp[:-1]:
-                next_node = _tmp[_tmp.index(k) + 1]
-                distance = distance + dict_of_neighbours[k][next_node]
+            # Append cost and add to neighborhood if unique
+            candidate = new_solution + [total_distance]
+            if candidate not in neighborhood_of_solution:
+                neighborhood_of_solution.append(candidate)
 
-            _tmp.append(distance)
-            if _tmp not in neighborhood_of_solution:
-                neighborhood_of_solution.append(_tmp)
-
-    indexOfLastItemInTheList = len(neighborhood_of_solution[0]) - 1
-
-    neighborhood_of_solution.sort(key=lambda x: x[indexOfLastItemInTheList])
+    # Sort neighbors by total cost (last item in list)
+    neighborhood_of_solution.sort(key=lambda x: x[-1])
     return neighborhood_of_solution
+
 
 
 def tabu_search(first_solution,
@@ -125,7 +104,7 @@ def tabu_search(first_solution,
     best_cost = distance_of_first_solution
     best_solution_ever = solution
     while count <= iters:
-        neighborhood = find_neighborhood(solution, dict_of_neighbours, n_opt=n_opt)
+        neighborhood = _find_neighborhood(solution, dict_of_neighbours, n_opt=n_opt)
         index_of_best_solution = 0
         best_solution = neighborhood[index_of_best_solution]
         best_cost_index = len(best_solution) - 1
@@ -161,5 +140,5 @@ def tabu_search(first_solution,
 
         count = count + 1
 
-    # best_solution_ever.pop(-1)
+
     return best_solution_ever, best_cost

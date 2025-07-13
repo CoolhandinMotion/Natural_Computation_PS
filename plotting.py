@@ -10,11 +10,16 @@ DATA_2_PLOT_LIM =  {DataType.KROA100: {'xlim': (-500,4500), 'ylim':(-500,2500)},
 DATA_2_PLOT_STRIDE =  {DataType.KROA100: {'xstride': 500, 'ystride':500},
                     DataType.BERLIN52: {'xstride': 500, 'ystride':200}}
 
-def plot_city_tour(all_results:dict,best_tours:dict,coords:NDArray,data_type:DataType):
+def plot_city_tour(all_results:dict,
+                   best_tours:dict,
+                   coords:NDArray,
+                   data_type:DataType,
+                   fig_size:tuple[float,float] = (10, 10)):
+
     best_overall_fitness = float('inf')
     best_overall_tour = None
     best_overall_key = ""
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=fig_size)
 
     for key, fitness_list in all_results.items():
         if not fitness_list: continue

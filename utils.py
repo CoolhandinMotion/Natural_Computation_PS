@@ -1,6 +1,7 @@
 
 
 
+KROA100_OPTIMUM = 21282
 
 # --- KORREKTUR: Daten direkt einbetten, um Netzwerkfehler zu vermeiden ---
 # Der Download von externen Quellen war unzuverlässig. Die Daten sind jetzt

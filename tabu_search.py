@@ -72,12 +72,6 @@ def _find_neighborhood(solution, neighbor_dict, n_opt=1):
     neighborhood = []
     solution_length = len(solution)
 
-    def calculate_total_distance(path):
-        return sum(
-            neighbor_dict[path[i]][path[i + 1]]
-            for i in range(len(path) - 1)
-        )
-
     for i in range(1, solution_length - n_opt):
         idx1 = list(range(i, i + n_opt))
 
@@ -94,7 +88,7 @@ def _find_neighborhood(solution, neighbor_dict, n_opt=1):
                     solution[idx1[k]]
                 )
 
-            total_cost = calculate_total_distance(new_solution)
+            total_cost = calculate_total_distance(new_solution, neighbor_dict)
             candidate = new_solution + [total_cost]
 
             if candidate not in neighborhood:

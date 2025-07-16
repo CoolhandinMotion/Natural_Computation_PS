@@ -1,9 +1,10 @@
 from numpy.typing import NDArray
 import numpy as np
 from enum import Enum
-
-from tensorboard.compat.proto.types_pb2 import DataType
-
+import os
+import json
+import pandas as pd
+import copy
 KROA100_OPTIMUM = 21282
 BERLIN52_OPTIMUM = 7542
 
@@ -43,6 +44,47 @@ def get_distance_matrix(coords:NDArray)->NDArray:
             dist_matrix[i, j] = dist_matrix[j, i] = dist
     return dist_matrix
 
+
+
+
+def save_json(all_results, all_logs: dict[str, list[pd.DataFrame]], best_tours, save_name: str):
+    corrected_all_logs = all_logs.copy()
+    for key, data_frame_list in all_logs.items():
+        for i, data_frame in enumerate(data_frame_list):
+            corrected_all_logs[key][i] = data_frame.to_dict(orient='records')
+
+    json_dict = {'all_results': all_results,
+                 'all_logs': corrected_all_logs,
+                 'best_tours': best_tours
+                 }
+
+    json_obj = json.dumps(json_dict, indent=8)
+
+    if not os.path.exists("./output"):
+        os.mkdir("./output")
+
+    with open(f'./output/{save_name}.json', 'w') as f:
+        f.write(json_obj)
+
+
+def load_json(json_path):
+    with open(json_path, 'r') as f:
+        res = json.load(f)
+        return res
+
+
+def load_results(json_path):
+    json_dict = load_json(json_path)
+    all_results = json_dict['all_results']
+    all_logs = json_dict['all_logs'].copy()
+    best_tours = json_dict['best_tours']
+
+    for key, list_of_dict_objs in json_dict['all_logs'].items():
+        list_of_dataframes = list_of_dict_objs.copy()
+        for i, to_be_df in enumerate(list_of_dict_objs):
+            list_of_dataframes[i] = pd.DataFrame(to_be_df)
+        all_logs[key] = list_of_dataframes
+    return all_results, all_logs, best_tours
 
 
 # --- KORREKTUR: Daten direkt einbetten, um Netzwerkfehler zu vermeiden ---

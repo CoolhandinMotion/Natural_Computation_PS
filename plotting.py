@@ -17,6 +17,7 @@ DATA_2_PLOT_STRIDE =  {DataType.KROA100: {'xstride': 500, 'ystride':500},
 def plot_ea_convergence(
         all_logs: Dict[str, List[pd.DataFrame]],
         n_runs:int,
+        save_name:str |None,
         num_interp_points: int = 500,
         title: str = None,
         xlabel: str = 'Number of Fitness Evaluations',
@@ -104,12 +105,17 @@ def plot_ea_convergence(
 
     plt.legend()
     plt.tight_layout()
+    if save_name:
+        plt.savefig(f"./output/{save_name}_convergence.png")
+        plt.close()
+        return
     plt.show()
 
 def plot_city_tour(all_results: dict,
                    best_tours: dict,
                    coords: NDArray,
                    data_type: DataType,
+                   save_name: str |None,
                    fig_size: tuple[float, float] = (10, 10)):
     best_overall_fitness = float('inf')
     best_overall_tour = None
@@ -153,4 +159,8 @@ def plot_city_tour(all_results: dict,
     y_stride = DATA_2_PLOT_STRIDE[data_type]['ystride']
     plt.gca().xaxis.set_major_locator(MultipleLocator(x_stride))
     plt.gca().yaxis.set_major_locator(MultipleLocator(y_stride))
+    if save_name:
+        plt.savefig(f"./output/{save_name}_tour.png")
+        plt.close()
+        return
     plt.show()
